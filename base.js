@@ -2,13 +2,13 @@
  * 提供基础、常见函数的封装
  *
  * @author  hechangmin@gmail.com
- * @date	2014.8.28
+ * @date    2014.8.28
  */
 
 var isType = function(type) {
-	return function(obj) {
-		return Object.prototype.toString.call(obj) === '[object ' + type + ']';
-	};
+    return function(obj) {
+        return Object.prototype.toString.call(obj) === '[object ' + type + ']';
+    };
 };
 
 //类型判断
@@ -26,26 +26,26 @@ var isString   = isType('String');
  * @param {Boolean} overwriteable true 默认是可覆盖
  */ 
 var extend = function(target, source, overwriteable){
-	
-	if(undefined === overwriteable){
-		overwriteable = true;
-	}
+    
+    if(undefined === overwriteable){
+        overwriteable = true;
+    }
 
-	for (var key in source) {
+    for (var key in source) {
 
-		if(!overwriteable && undefined !== target[key]){
-			continue;
-		}
+        if(!overwriteable && undefined !== target[key]){
+            continue;
+        }
 
-		if (isObject(source[key])) {
-			//递归
-			target[key] = arguments.callee({}, source[key]);
-		} else {
-			target[key] = source[key];
-		}
-	}
+        if (isObject(source[key])) {
+            //递归
+            target[key] = arguments.callee({}, source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
 
-	return target;
+    return target;
 };
 
 /**
@@ -56,13 +56,13 @@ var extend = function(target, source, overwriteable){
  * 
  */ 
 var each = function(obj, cb){
-	var i = 0;
-	for(var key in obj) {
-		if(cb(obj[key], key, i++) == 'break'){
-			break;
-		}
-	}
-	return obj;
+    var i = 0;
+    for(var key in obj) {
+        if(cb(obj[key], key, i++) == 'break'){
+            break;
+        }
+    }
+    return obj;
 };
 
 /**
@@ -73,16 +73,16 @@ var each = function(obj, cb){
  * @return {Object} 生成或已有的对象
  */ 
 var createNamespaces = function(context, names){
-	var namespaces = names.split('.');
-	var parentNode;
-	var curNode;
-	
-	//生成命名空间树
-	for (parentNode = context; namespaces.length && (curNode = namespaces.shift());){
-		parentNode = parentNode[curNode] ? parentNode[curNode] : parentNode[curNode] = {};
-	}
+    var namespaces = names.split('.');
+    var parentNode;
+    var curNode;
+    
+    //生成命名空间树
+    for (parentNode = context; namespaces.length && (curNode = namespaces.shift());){
+        parentNode = parentNode[curNode] ? parentNode[curNode] : parentNode[curNode] = {};
+    }
 
-	return parentNode;
+    return parentNode;
 };
 
 /**
@@ -98,41 +98,41 @@ var createNamespaces = function(context, names){
  */
 var exportTo = function(target, source){
 
-	var hasDefine = typeof define === 'function';
-	var hasExports = typeof module !== 'undefined' && module.exports;
+    var hasDefine = typeof define === 'function';
+    var hasExports = typeof module !== 'undefined' && module.exports;
 
-	// 检查模块是否是函数
-	var isFnSource = isFunction(source);
-	// 检查模块是否是对象
-	var isObjSource = isObject(source);
+    // 检查模块是否是函数
+    var isFnSource = isFunction(source);
+    // 检查模块是否是对象
+    var isObjSource = isObject(source);
 
-	var curNameNode;
+    var curNameNode;
 
-	if(isFnSource || isObjSource){
-		// AMD Module or CMD Module
-		if (hasDefine) {
-			define(source);
-		} 
-		//NodeJS Module
-		else if (hasExports) {
-			if(isFnSource){
-				module.exports = source();
-			}else{
-				module.exports = source;
-			}
-		} 
-		// Assign to namespaces or simply the global object (window)
-		else {
-			if(isObject(target)){
-				extend(target, isFnSource? source() : source);
-			}else if(isString(target)){
-				curNameNode = createNamespaces(this, target);
-				extend(curNameNode, isFnSource? source() : source);
-			}else{
-				throw('target must be a string or object.');
-			}
-		}
-	}else{
-		throw('source must be a function or object.');
-	}
+    if(isFnSource || isObjSource){
+        // AMD Module or CMD Module
+        if (hasDefine) {
+            define(source);
+        } 
+        //NodeJS Module
+        else if (hasExports) {
+            if(isFnSource){
+                module.exports = source();
+            }else{
+                module.exports = source;
+            }
+        } 
+        // Assign to namespaces or simply the global object (window)
+        else {
+            if(isObject(target)){
+                extend(target, isFnSource? source() : source);
+            }else if(isString(target)){
+                curNameNode = createNamespaces(this, target);
+                extend(curNameNode, isFnSource? source() : source);
+            }else{
+                throw('target must be a string or object.');
+            }
+        }
+    }else{
+        throw('source must be a function or object.');
+    }
 };

@@ -2,7 +2,7 @@
  * Javascript cookie packaging operation
  * 
  * @author  hechangmin@gmail.com
- * @date	2010.5
+ * @date    2010.5
  * @version 1.1
  */
 
