@@ -2,7 +2,7 @@
  * Expansion of native Array
  *
  * @author  hechangmin@gmail.com
- * @date    2010.5
+ * @date    2014.9
  *
  * 暂不扩展如下函数：
  *
@@ -356,6 +356,14 @@ extend(Array.prototype, function() {
         return this;
     };
 
+    var max = function(){
+        return Math.max.apply(this,this);
+    };
+    
+    var min = function(){
+        return Math.min.apply(this,this);
+    };
+
     /**
      * 随机返回数组元素
      */
@@ -378,6 +386,8 @@ extend(Array.prototype, function() {
         some: some,
         map: map,
         unique: unique,
-        random: random
+        random: random,
+        max: max,
+        min: min
     };
-}, false);
+}(), false);
