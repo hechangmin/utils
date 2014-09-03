@@ -1,138 +1,142 @@
 /**
- * 提供基础、常见函数的封装
+ * 提供命名空间及对象扩展
  *
  * @author  hechangmin@gmail.com
  * @date    2014.8.28
  */
 
-var isType = function(type) {
-    return function(obj) {
-        return Object.prototype.toString.call(obj) === '[object ' + type + ']';
+(function() {
+    var isType = function(type) {
+        return function(obj) {
+            var strFullType = Object.prototype.toString.call(obj);
+            var curType = strFullType.split(' ')[1].split(']')[0];
+
+            //The results of window is global, but should be object.
+            if('Object' === type && curType === 'global'){
+                return true;
+            }else{
+                return type === curType;
+            }
+        };
     };
-};
 
-//类型判断
-var isObject   = isType('Object'); 
-var isError    = isType('Error');
-var isArray    = Array.isArray || isType('Array');
-var isFunction = isType('Function');
-var isString   = isType('String');
+    //类型判断
+    var isObject = isType('Object');
+    var isError = isType('Error');
+    var isArray = Array.isArray || isType('Array');
+    var isFunction = isType('Function');
+    var isString = isType('String');
 
-/**
- * 继承与扩展
- * 
- * @param {Object} target
- * @param {Object} source
- * @param {Boolean} overwriteable true 默认是可覆盖
- */ 
-var extend = function(target, source, overwriteable){
-    
-    if(undefined === overwriteable){
-        overwriteable = true;
-    }
-
-    for (var key in source) {
-
-        if(!overwriteable && undefined !== target[key]){
-            continue;
+    /**
+     * 继承与扩展
+     *
+     * @param {Object} target
+     * @param {Object} source
+     * @param {Boolean} overwriteable true 默认是可覆盖
+     * @return {Object} 经扩展后的target
+     */
+    var extend = function(target, source, overwriteable) {
+        
+        if(!isObject(source)){
+            return target;
         }
 
-        if (isObject(source[key])) {
-            //递归
-            target[key] = arguments.callee({}, source[key]);
-        } else {
-            target[key] = source[key];
+        // why target don't use isObject, String.prototype\Function.prototype\Array.prototype
+        // result of typeof null is object
+        if('object' !== typeof target || null == target){
+            return target;
         }
-    }
 
-    return target;
-};
-
-/**
- * 遍历
- * 
- * @param {Object} obj
- * @param {Function} cb
- * 
- */ 
-var each = function(obj, cb){
-    var i = 0;
-    for(var key in obj) {
-        if(cb(obj[key], key, i++) == 'break'){
-            break;
+        if (undefined === overwriteable) {
+            overwriteable = true;
         }
-    }
-    return obj;
-};
 
-/**
- * 生成名字空间
- * 
- * @param {Object} context 上下文环境
- * @param {String} names
- * @return {Object} 生成或已有的对象
- */ 
-var createNamespaces = function(context, names){
-    var namespaces = names.split('.');
-    var parentNode;
-    var curNode;
-    
-    //生成命名空间树
-    for (parentNode = context; namespaces.length && (curNode = namespaces.shift());){
-        parentNode = parentNode[curNode] ? parentNode[curNode] : parentNode[curNode] = {};
-    }
+        for (var key in source) {
 
-    return parentNode;
-};
+            if (!overwriteable && undefined !== target[key]) {
+                continue;
+            }
 
-/**
- * 发布一个模块，支持AMD\CMD\NODEJS\namespaces\对象扩展
- * 
- * @param {String or Object} target 目标模块
- * @param {Function or Object} source 模块
- * @throws {Error} If params TypeError
- * 
- * @example
- *  exportTo('M0.M1.M2', {name : 'hello world.'});
- *  exportTo('M0.M1', function(){return {age : 5000};});
- */
-var exportTo = function(target, source){
+            if (isObject(source[key])) {
+                //递归
+                target[key] = arguments.callee({}, source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        }
 
-    var hasDefine = typeof define === 'function';
-    var hasExports = typeof module !== 'undefined' && module.exports;
+        return target;
+    };
 
-    // 检查模块是否是函数
-    var isFnSource = isFunction(source);
-    // 检查模块是否是对象
-    var isObjSource = isObject(source);
+    /**
+     * 生成名字空间
+     *
+     * @param {Object} context 上下文环境
+     * @param {String} namespaces
+     * @return {Object} 生成或已有的对象
+     */
+    var createNamespaces = function(context, namespaces){
+        var names = namespaces.split('.');
+        var parentNode;
+        var curNode;
 
-    var curNameNode;
+        //生成命名空间树
+        for (parentNode = context; names.length && (curNode = names.shift());) {
+            parentNode = parentNode[curNode] ? parentNode[curNode] : parentNode[curNode] = {};
+        }
 
-    if(isFnSource || isObjSource){
+        return parentNode;
+    };
+
+    /**
+     * 导出对象到指定名字空间
+     *
+     * @param {String or Object} target 目标模块
+     * @param {Function or Object} source 模块
+     * @throws {Error} If params TypeError
+     *
+     * @example
+     *  exportTo('M0.M1.M2', {name : 'hello world.'});
+     *  exportTo('M0.M1', function(){return {age : 5000};});
+     */
+    var exportTo = function(target, source, overwriteable) {
+        var hasDefine = typeof define === 'function';
+        var hasExports = typeof module !== 'undefined' && module.exports;
+        var isFnSource = isFunction(source);
+
         // AMD Module or CMD Module
-        if (hasDefine) {
+        if (hasDefine && isFnSource) {
             define(source);
-        } 
-        //NodeJS Module
-        else if (hasExports) {
-            if(isFnSource){
-                module.exports = source();
-            }else{
+        }else {
+            source = isFunction(source) ? source() : source;
+            //NodeJS Module    
+            if (hasExports) {
                 module.exports = source;
-            }
-        } 
-        // Assign to namespaces or simply the global object (window)
-        else {
-            if(isObject(target)){
-                extend(target, isFnSource? source() : source);
-            }else if(isString(target)){
-                curNameNode = createNamespaces(this, target);
-                extend(curNameNode, isFnSource? source() : source);
-            }else{
-                throw('target must be a string or object.');
+            } else {
+                // Assign to namespaces or simply the global object (window)
+                if (isString(target)) {
+                    target = createNamespaces(this, target);
+                }
+                if (isObject(source)) {
+                    if (isObject(target)) {
+                        extend(target, source, overwriteable);
+                    } else {
+                        throw ('target must be a string or object.');
+                    }
+                } else {
+                    throw ('source must be a function or object.');
+                }
             }
         }
-    }else{
-        throw('source must be a function or object.');
-    }
-};
+    };
+
+    exportTo(this, {
+        isObject: isObject,
+        isError: isError,
+        isArray: isArray,
+        isFunction: isFunction,
+        isString: isString,
+        extend: extend,
+        exportTo: exportTo
+    });
+}());

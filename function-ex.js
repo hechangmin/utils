@@ -8,7 +8,7 @@
 extend(Function.prototype, {
 
     /**
-     * ecmas5 强制绑定this,及绑定参数
+     * ECMAS5 强制绑定this,及绑定参数
      * @param  {Object} thisArg 
      * @return {Function}  
      */
