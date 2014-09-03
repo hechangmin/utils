@@ -26,6 +26,7 @@
     var isArray = Array.isArray || isType('Array');
     var isFunction = isType('Function');
     var isString = isType('String');
+    var global = 'undefined' === typeof global ? this : global;
 
     /**
      * 继承与扩展
@@ -115,7 +116,7 @@
             } else {
                 // Assign to namespaces or simply the global object (window)
                 if (isString(target)) {
-                    target = createNamespaces(this, target);
+                    target = createNamespaces(global, target);
                 }
                 if (isObject(source)) {
                     if (isObject(target)) {
@@ -129,8 +130,8 @@
             }
         }
     };
-
-    exportTo(this, {
+    
+    exportTo(global, {
         isObject: isObject,
         isError: isError,
         isArray: isArray,
