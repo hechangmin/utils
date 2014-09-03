@@ -42,8 +42,8 @@
             return target;
         }
 
-        // why target don't use isObject, String.prototype\Function.prototype\Array.prototype
-        // result of typeof null is object
+        // 1. if params [String.prototype\Function.prototype\Array.prototype ...] results of isObject is not object
+        // 2. results of typeof null is object
         if('object' !== typeof target || null == target){
             return target;
         }
