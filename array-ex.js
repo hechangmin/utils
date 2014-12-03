@@ -305,8 +305,7 @@ extend(Array.prototype, function() {
      */
     var some = function(fn) {
         var len = this.length >>> 0;
-        callbackfn(fn);
-
+        
         for (var i = 0; i < len; i++) {
             if (fn(this[i], i, this)) {
                 return true;
@@ -326,8 +325,6 @@ extend(Array.prototype, function() {
     var map = function(fn) {
         var result = [];
         var len = this.length >>> 0;
-
-        callbackfn(fn);
 
         for (var i = 0; i < len; i++) {
             result.push(fn(this[i]));
